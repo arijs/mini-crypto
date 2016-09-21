@@ -1,0 +1,50 @@
+{
+  "name": "mini-crypto",
+  "version": "0.0.1",
+  "description": "micro library to encrypt/decrypt strings",
+  "main": "dist/mini-crypto.js",
+  "module": "dist/mini-crypto.esm.js",
+  "jsnext:main": "dist/mini-crypto.esm.js",
+  "scripts": {
+    "prebuild": "eslint lib test",
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "pretest": "npm run build && rollup -c rollup.config.test.js",
+    "test": "mocha",
+    "prepublish": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arijs/mini-crypto.git"
+  },
+  "keywords": [
+    "cripto",
+    "encrypt",
+    "decrypt",
+    "encode",
+    "decode",
+    "seed",
+    "salt"
+  ],
+  "author": "Rafael Hengles",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/arijs/mini-crypto/issues"
+  },
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "homepage": "https://github.com/rollup/rollup-starter-project#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "buble": "^0.13.2",
+    "babel-eslint": "^6.1.2",
+    "eslint": "^3.2.2",
+    "istanbul": "^0.4.4",
+    "mocha": "^3.0.2",
+    "rollup": "^0.34.7",
+    "rollup-plugin-buble": "^0.13.0",
+    "rollup-watch": "^2.5.0"
+  }
+}
