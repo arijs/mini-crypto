@@ -120,24 +120,18 @@ var cripto$1 = custom();
 cripto$1.defaults = defaults;
 cripto$1.custom = custom;
 
-var inv256 = 1/1048576;
-var factor = 655361*inv256;
-function getSeed(str, mod, start) {
-	var c, n, slen = str && str.length || 0;
+function getSum(str, params) {
+	var slen = str && str.length || 0;
+	var mod = params.mod;
+	var sum, n;
 	if ( slen < 16 ) throw new Error('Seed too short: '+slen+' ('+str+')');
-	mod = +mod|0 || (1024 * 1024 * 1024);
-	start = (+start|0) % mod || (mod*factor)|0;
-	c = start;
+	sum = params.start;
 	for ( var i = 0; i < slen; i++ ) {
 		n = str.charCodeAt(i);
-		c += (n % mod) * (((c % 32) * i + 1) % 32);
-		c %= mod;
+		sum += (slen + n) * ((sum % 1024) + 1) * ((i % 64) + 1);
+		sum %= mod;
 	}
-	return (
-		{ seed: c
-		, mod: mod
-		, start: start
-		});
+	return sum;
 }
 
 function randstr(len, charlist) {
@@ -164,7 +158,7 @@ function getSalt(charlist) {
 
 getSalt.randstr = randstr;
 
-function charOffset(list, offset) {
+function charOffset(offset, list) {
 	offset = [].concat(offset || []);
 	offset[0] || (offset[0] = 1);
 	var index = getIndex(list)
@@ -217,29 +211,59 @@ function convert$1(str, list, index, offset) {
 	return after;
 }
 
-function seedToOffset(seed, sum, list) {
-	var offset = []
+function getOffset$1(seed, sum, offset, list) {
+	var olen = offset.length
+		, slen = seed.length
+		, chOffset = []
 		, total = 0
 		, current;
 	list = list.length;
-	for ( var i = 0, ii = seed.length; i < ii; i++ ) {
-		current = seed.charCodeAt(i) + ((i * sum + i) % list);
-		total += current;
-		total %= list;
-		offset[i] = total;
+	for ( var i = 0; i < slen; i++ ) {
+		current = (seed.charCodeAt(i) + i) * sum + i;
+		total += current + (offset[(current+i)%olen] || 0);
+		//,total %= list;
+		chOffset[i] = total % list;
 	}
-	return offset;
+	return chOffset;
 }
 
-function charSeed(seed, sum, list) {
-	var offset = seedToOffset(seed, sum, list);
-	return charOffset(list, offset);
+function charSeed(seed, sum, offset, list) {
+	var chOffset = getOffset$1(seed, sum, offset, list);
+	return charOffset(chOffset, list);
 }
 
 var obj =
 		{ offset: charOffset
 		, seed: charSeed
+		, getOffset: getOffset$1
 		};
+
+function initParams(params) {
+	var mod = params.mod;
+	if ( !mod ) {
+		mod = 1024 * 1024 * 1024;
+	}
+	params.mod = mod;
+	var start = params.start;
+	if ( !start ) {
+		start = parseInt(mod * (655361/1048576));
+	}
+	params.start = start % mod;
+	var list = params.list;
+	if ( !list ) {
+		list = cripto$1.scheme.list;
+	}
+	var len = list.length;
+	if ( len < 16 ) {
+		throw new Error('List too short: '+len+' <<'+list+'>>');
+	}
+	params.list = list;
+	var count = params.count;
+	if ( !count ) {
+		count = 64;
+	}
+	params.count = count;
+}
 
 function getFactor(c) {
 	c = ((c % 4) + 4) % 4;
@@ -269,44 +293,20 @@ function getSaltLengthPost(sum, length) {
 	return (length - (sum % length));
 }
 
-function getOffset(seed, mod, start, list) {
-	var len = list.length
-		, min = 8
-		, count = 4
-		, done = 0
-		, remain = len - min
-		, seedPi = seed * Math.PI * mod * 10
+function getOffset(sum, params) {
+	var mod = params.mod;
+	var start = params.start;
+	var count = params.count;
+	var done = 0
+		, seedPi = parseInt((sum + start) * Math.PI * 1024 + count)
 		, off = [];
 	while ( done < count ) {
-		off[done] = (seed + (done * seedPi |0)) % remain + min
+		var current = ((done % 64) + 1) * seedPi;
+		current = (sum + start + current) % mod;
+		off[done] = current;
 		done++;
 	}
 	return off;
-}
-
-function getParamsCharlist(params) {
-	return params && (params.list || cripto$1.scheme.list);
-}
-
-function getRawCripto(seed, params) {
-	params || (params = {});
-	var mod = params.mod
-		, start = params.start
-		, list = getParamsCharlist(params);
-	var len = list.length
-	if ( len < 16 ) throw new Error('List too short: '+len+' <<'+list+'>>');
-	var sum = getSeed(seed, mod, start);
-	seed = sum.seed;
-	params.mod = mod = sum.mod;
-	params.start = start = sum.start;
-	var offset = getOffset(seed, mod, start, list)
-		, cripto = cripto$1.custom(offset, list)
-		, salt = getSalt(list);
-	return (
-		{ seed: seed
-		, cripto: cripto
-		, salt: salt
-		});
 }
 
 function salt(fn, count, str, length) {
@@ -315,39 +315,65 @@ function salt(fn, count, str, length) {
 	return fn(str, pre, post);
 }
 
-function choffset(seed, sum, obj$$) {
-	var list = obj$$.cripto.scheme.list;
-	return obj.seed(seed, sum, list);
+function verifyOffset(list1, list2) {
+	var min = Math.min(list1.length, list2.length);
+	var max = Math.max(list1.length, list2.length);
+	var diff = max-min;
+	for ( var i = 0; i < min; i++ ) {
+		diff += (list1[i] !== list2[i]) ? 1 : 0;
+	}
+	return diff;
+}
+
+function getSources(seed, params) {
+	var list = params.list;
+	var sum = getSum(seed, params);
+	var offset = getOffset(sum, params);
+	var salt = getSalt(list);
+	var chOffset = obj.getOffset(seed, sum, offset, list);
+	return ({
+		sum: sum,
+		offset: offset,
+		chOffset: chOffset,
+		verify: verifyOffset(offset, chOffset),
+		charOffset: obj.offset(chOffset, list),
+		cripto: cripto$1.custom(chOffset, list),
+		salt: salt
+	});
 }
 
 function getCripto(params) {
 	params || (params = {});
+	initParams(params);
 	return (
 		{ params: params
+		, sources: function(seed) {
+				return getSources(seed, params);
+			}
 		, encode: function(seed, str) {
-				var obj = getRawCripto(seed, params)
-					, sum = obj.seed
-					, saltLen = params.salt || 0;
-				str = choffset(seed, sum, obj).encode(str);
-				str = conv(+getFactor(sum), str, obj.cripto);
+				var sources = getSources(seed, params);
+				var sum = sources.sum;
+				var saltLen = params.salt || 0;
+				str = sources.charOffset.encode(str);
+				str = conv(+getFactor(sum), str, sources.cripto);
 				if (saltLen) {
-					str = salt(obj.salt.salt, sum, str, saltLen);
+					str = salt(sources.salt.salt, sum, str, saltLen);
 				}
 				return str;
 			}
 		, decode: function(seed, str) {
-				var obj = getRawCripto(seed, params)
-					, sum = obj.seed
-					, saltLen = params.salt || 0;
+				var sources = getSources(seed, params);
+				var sum = sources.sum;
+				var saltLen = params.salt || 0;
 				if (saltLen) {
-					str = salt(obj.salt.desalt, sum, str, saltLen);
+					str = salt(sources.salt.desalt, sum, str, saltLen);
 				}
-				str = conv(-getFactor(sum), str, obj.cripto)
-				str = choffset(seed, sum, obj).decode(str);
+				str = conv(-getFactor(sum), str, sources.cripto)
+				str = sources.charOffset.decode(str);
 				return str;
 			}
 		, randstr: function(len) {
-				return getSalt.randstr(len, getParamsCharlist(params));
+				return getSalt.randstr(len, params.list);
 			}
 		});
 }

@@ -6,36 +6,36 @@ Output:
 
 ```
 -------- Default --------
-Encoded 1 (2vöÙ)RÊû)ÒÚéOF@VÏ Yô>!î58tÃ$ë/-^ê_N[RxöÍÂèÌIõ´d{nZ!áì~ÎËâ)çùbUzfÚñxsÊCí(): 9876543210fedcba
-Encoded 2 (ÍÖjõIHò`6HJVrôóöÂ6é74OHEî3és&ïûÈWîÏÌQ%3PK4Ï*'\(LgK)´cÍ4äÕQ)i<{ef]ÕMtFÂQz): .fÙ2ôyÚV2[püÂ5t0
+Encoded 1 (ÕÃ_3S;qXÕàhUËtDüLïü]ËìSÔL65BÕjm}fÏ}áÕqÍÎfJD´LõëÁUrÁHLûü(U~mCfÂÌVB|V/fE}s): 9876543210fedcba
+Encoded 2 (EÖ$#Èò%wl"iVîuÈÜ{#ÜXVÀ&ÇèÍË<V6xiQ]i.<éÈG|!yô<à-Ë?AËkô/x>'vnjôdRymCy2jÂ-ë): ÉîW>V|êËxWêâ'õÜF
 Decoded 1-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Decoded 1-2: h7òîÄú4'Ì|WeÖ1îñ+rûÂ$CÛD+KFIÙÈQòúü4t~SîüzÚNÕÁm(ejhÙ$[üE;ôä[Ç(OIsËÜÓT+jNC
-Decoded 2-1: ÊÇëãúìã[jhèíBWêèÀÕKç{ÛÂ#n{dÜEgÀ4ç´öäP%Ó92bñVï'.ÎÛ%U~#ÎAÌÎB-MG*ÊsÙjä_ìP9Â
+Decoded 1-2: h8},LÓ7ÓBÕÎe\éü#rY#`ÍS?à: C_}*ùXö1XõdzòNÚÊQ öçt6_N6üPbíuhíàlãìä>'x>wÖ:lg
+Decoded 2-1: gëJqÇs%SAm4ií:ç(Ú&(r._ÏÊníâfo7*XÒìXcÏ"BbhKÓKãR!àçbàH3a5WÓIénÜûLCú;ClünHü
 Decoded 2-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Encoded 1-2: ÍÖjõIHò`6HJVrôóöÂ6é74OHEî3és&ïûÈWîÏÌQ%3PK4Ï*'\(LgK)´cÍ4äÕQ)i<{ef]ÕMtFÂQz
+Encoded 1-2: EÖ$#Èò%wl"iVîuÈÜ{#ÜXVÀ&ÇèÍË<V6xiQ]i.<éÈG|!yô<à-Ë?AËkô/x>'vnjôdRymCy2jÂ-ë
 Recoded 1-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Encoded 2-1: 2vöÙ)RÊû)ÒÚéOF@VÏ Yô>!î58tÃ$ë/-^ê_N[RxöÍÂèÌIõ´d{nZ!áì~ÎËâ)çùbUzfÚñxsÊCí(
+Encoded 2-1: ÕÃ_3S;qXÕàhUËtDüLïü]ËìSÔL65BÕjm}fÏ}áÕqÍÎfJD´LõëÁUrÁHLûü(U~mCfÂÌVB|V/fE}s
 Recoded 2-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 -------- Custom 1 --------
-Encoded 1 (vfhf|î<5fFu{õ.cA õLJ~ñ9kÙ(i)4äj4`ç;$zDÃ2Ò0UöKW9KPùâ-sënR@`éÎz;}zÏd#Ö(iõ$4P<8sâts:CÍÉ0Uç-Kó&ö:a+\qo;x~QP'): 9876543210fedcba
-Encoded 2 (*Nyôò+>D#òt-õÌñWLn6>f[!6WYu17&CV´zk:gÜÍkù4-â"3aóëêHíWl$HÂÊSNA/+EÛîMÙùPIM~uÈè!B^6Toé~êÚâ+OVÕâÛ(KpW1ÙNíÃ'Q): QM4fI7;ì|yÃÛu]ê5
+Encoded 1 (Éâ=*o%JziZ}íà|úäËBÖaÕc~DÖK I5TsVnà&ôU}Ü=/DÄ)9S) \ÙU9Ã})vÇn9CAfCÄ;$ëA35CmiNAÑw&Ñ91ÈDwÂÌÑÊp-w!Í<!AàÓnÍPo!Í): 9876543210fedcba
+Encoded 2 (õH?{Ny^gd>vTÌ/èó"ÑöqUpY\áîzÃóWRrÀôÃ{O{#%àsD2ú(;E51cd#LkÃeN~4yYbÏcáÈêk[Ç´9Pï^ÛZÄrÈC5õÇh#%àsD2ú(;E51cd#LkN): éFùÇîW.äõÙ$~,Hçö
 Decoded 1-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Decoded 1-2: ò#:ùï*ÉguÜûbÎ+NtX0L-òÒc!{1Ù~4Îè=ô:/O_êoÃ92jÉceÎïl`Ò.ODÙ`3óXÛî30`3OÜÉùCéÀ
-Decoded 2-1: éëhrHÏMDJ$20Ó.ëuFMÒÛIHÏbDJ Ô3áÙÎ6RÓjybb+ÌäjtN}}vÙ \`õK'^úK*uqz~tO@A>T3:Ç
+Decoded 1-2: 6ÏtÒA.B>iIàQZSçxúÈG!ïôèeji ÕnMM!.$E1HBÜ7E0rÁâÊÉäB4[öùâüPÜv+ÃÏÈ\ï'ûtX #>Ö
+Decoded 2-1: 7`^ìÖ+â{èMOÄNQâWÎy7ãê e}égIËòÒÚçÌÏnÑ%ÚËÉÙ?~9ôêò0ÒW*ÀGÕéË^LÜ 9,x<*UBui<^â
 Decoded 2-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Encoded 1-2: ÉÄÁÈ9õ4/Ú`v[[}hT*n6>f[!6WYu17&CV´zk:gÜÍkù4-â"3aóëêHíWl$HÂÊSNA/+EÛîMÙùPIM~uÈè!B^6Toé~êÚâ+OR+´sÔèuôynÛËêRp
-Recoded 1-2: u^}qAùTIssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Encoded 2-1: Õ8wÒZ{)òrFu{õ.cA õLJ~ñ9kÙ(i)4äj4`ç;$zDÃ2Ò0UöKW9KPùâ-sënR@`éÎz;}zÏd#Ö(iõ$4P<8sâts:bÂ(n?5emãGke=íÈ+Ò([v2'ñ
-Recoded 2-1: u^}qAùTIssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
--------- Custom 2 --------
-Encoded 1 (ûS(bÎ+Ù/äöùÖ}1ob4iäÙ-Vç7KèüUnÁúë5âKÇqIí-kr!X$È3ûhDk%´~&qeE?.îÛ(4ÉLe'çTf´): 9876543210fedcba
-Encoded 2 (6gòç''&úrOÇ #$hG*ÜÍF,ï*UÂ0ÈüyC_Y@òQT]A@z;ÉÛÁZdFÌ+NPáûs+Ëâ?I^ÊÕT|Ùj`5$6Ù>): %Íó~ÂkYÙÂk0Z,gÕD
-Decoded 1-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Decoded 1-2: íWz´üà1ï(fh_y99iñ<xÄJpÄ&B-IAïOÍEËôG}YbRóV3IÙÈúIÈ|K|@B$û2ÛáURûPâpù*;rEDzò
-Decoded 2-1: SÍÁ!ërÏÒ*||%KûácÖ%~=èèy@3ùñÑTöy~e6"a2Üâ{GÛÛ>70:àÛägçÀaEC!Ù0TÎ0' #oK1àeeû
-Decoded 2-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Encoded 1-2: 6gòç''&úrOÇ #$hG*ÜÍF,ï*UÂ0ÈüyC_Y@òQT]A@z;ÉÛÁZdFÌ+NPáûs+Ëâ?I^ÊÕT|Ùj`5$6Ù>
+Encoded 1-2: !&U}2LQÜLY?PÃùÄ-[^ÖvÂö:gTLJY2Í%rÀôÃ{O{#%àsD2ú(;E51cd#LkÃeN~4yYbÏcáÈêk[Ç´9Pï^ÛZÄrÈC5õÇh#%àsD2ú(;E51cd#LkÏ
 Recoded 1-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-Encoded 2-1: ûS(bÎ+Ù/äöùÖ}1ob4iäÙ-Vç7KèüUnÁúë5âKÇqIí-kr!X$È3ûhDk%´~&qeE?.îÛ(4ÉLe'çTf´
+Encoded 2-1: *@ò[éA';ÇBÀíñÒwz!k3ú5T_f=ñâ\j6>Vnà&ôU}Ü=/DÄ)9S) \ÙU9Ã})vÇn9CAfCÄ;$ëA35CmiNAÑw&Ñ91ÈDwÂÌÑÊp-w!Í<!AàÓnÍPo!'
+Recoded 2-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+-------- Custom 2 --------
+Encoded 1 (GoùüU"öUDI+õè'rÖ=@5i;ÇÖ/eÉ8ì2à{9ù*ímpz9MBÈ}oZÔgâ#ËÙ+ÖYâÄOò$uüÕó<ÒjÏ89;<_): 9876543210fedcba
+Encoded 2 (èó8eÎ_(Pu07$è<ÍáuT]bÍK@û8àé!ut"Î8Q E"ã,`Y:d@8*q5YvÊôqÓ$mèoü,Yz.6èGïÁ.w!P): Q;(öhë´kÜ]Ëä?ZJ8
+Decoded 1-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+Decoded 1-2: íÊ`b$r)\aDcástv7ú5ï.zb=YòäI_Áü*3ORjC<R 9mÊ11-õàÙ7ë.Èä)Ô|&"Ü9ÒvüoÉúVñ1p$9
+Decoded 2-1: tmá!vHÜf;õëés#iâ2ÑÉÜ<üà=NÍÍQüóÎñö0/çù!ü&l4:rSHFq9 EûÏ7oàõh#w'zÊÚ_WjÇì/Ö^
+Decoded 2-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+Encoded 1-2: èó8eÎ_(Pu07$è<ÍáuT]bÍK@û8àé!ut"Î8Q E"ã,`Y:d@8*q5YvÊôqÓ$mèoü,Yz.6èGïÁ.w!P
+Recoded 1-2: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+Encoded 2-1: GoùüU"öUDI+õè'rÖ=@5i;ÇÖ/eÉ8ì2à{9ù*ímpz9MBÈ}oZÔgâ#ËÙ+ÖYâÄOò$uüÕó<ÒjÏ89;<_
 Recoded 2-1: secret sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 ```

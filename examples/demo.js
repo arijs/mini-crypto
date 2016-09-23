@@ -9,7 +9,9 @@ var str = 'secret ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 	//, seed2 = 'fedcba9876543210' // incompatible example
 	, seed2 = cripto.randstr(16)
 	, encoded1 = cripto.encode(seed1, str)
+	, sources1 = cripto.sources(seed1)
 	, encoded2 = cripto.encode(seed2, str)
+	, sources2 = cripto.sources(seed2)
 	, decoded11 = cripto.decode(seed1, encoded1)
 	, decoded12 = cripto.decode(seed1, encoded2)
 	, decoded21 = cripto.decode(seed2, encoded1)
@@ -20,7 +22,21 @@ var str = 'secret ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 	, recoded21 = cripto.decode(seed1, encoded21);
 
 console.log('Encoded 1 ('+encoded1+'): '+seed1);
+/* @debug console.log('Sum '+sources1.sum+' '+
+	sources1.verify+' ['+
+	sources1.offset.slice(0, 4).join()+
+	']('+sources1.offset.length+') ['+
+	sources1.chOffset.slice(0, 4).join()+
+	']('+sources1.chOffset.length+')'
+);*/
 console.log('Encoded 2 ('+encoded2+'): '+seed2);
+/* @debug console.log('Sum '+sources2.sum+' '+
+	sources2.verify+' ['+
+	sources2.offset.slice(0, 4).join()+
+	']('+sources2.offset.length+') ['+
+	sources2.chOffset.slice(0, 4).join()+
+	']('+sources2.chOffset.length+')'
+);*/
 
 console.log('Decoded 1-1: '+decoded11);
 console.log('Decoded 1-2: '+decoded12);
