@@ -59,7 +59,7 @@ function getScheme(offset, list) {
 
 	offset || (offset = defaults.offset);
 	list || (list = defaults.list);
-	if ( !offset instanceof Array ) offset = [offset];
+	if ( !(offset instanceof Array) ) offset = [offset];
 	olen = offset.length;
 	av = list;
 	al = av.length;
