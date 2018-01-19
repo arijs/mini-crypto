@@ -1,6 +1,6 @@
 {
   "name": "mini-crypto",
-  "version": "0.0.2",
+  "version": "0.0.3-alpha.1",
   "description": "micro library to encrypt/decrypt strings",
   "main": "dist/mini-crypto.js",
   "module": "dist/mini-crypto.esm.js",
