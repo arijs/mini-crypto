@@ -1,3 +1,76 @@
+function isSurrogateHigh(n) {
+	return 0xd800 <= n && n <= 0xdbff;
+}
+function isSurrogateLow(n) {
+	return 0xdc00 <= n && n <= 0xdfff;
+}
+
+function codePointIterator(str, i) {
+	var slen = str.length;
+	var pos;
+	setPos(i);
+	return {
+		current: current,
+		move: move,
+		isFirst: isFirst,
+		isLast: isLast,
+		setPos: setPos,
+		hasPos: hasPos
+	};
+	function setPos(i) {
+		i = +i ? (i > 0 ? i : slen - i) : 0;
+		tryPos(i);
+		pos = correctPos(i);
+	}
+	function hasPos(pos) {
+		return 0 <= pos && pos < slen;
+	}
+	function isFirst() {
+		return pos[0] == 0;
+	}
+	function isLast() {
+		return (pos[0] + pos[1]) == slen;
+	}
+	function tryPos(pos) {
+		if (!hasPos(pos)) {
+			throw new Error('Out of bounds: pos '+pos+' of string with length '+slen);
+		}
+	}
+	function correctPos(p) {
+		var clen = 1;
+		if (isSurrogateLow(str.charCodeAt(p))) {
+			clen = 2;
+			p--;
+		}
+		if (isSurrogateHigh(str.charCodeAt(p))) {
+			clen = 2;
+		}
+		return [p, clen];
+	}
+	function move(walk) {
+		var step = (walk == 0) ? 0 : (walk > 0 ? 1 : -1);
+		while (walk) {
+			var p = pos[0];
+			walk -= step;
+			p += (step == 1 && pos[1] == 2) ? 2 : step;
+			tryPos(p);
+			pos = correctPos(p);
+		}
+	}
+	function current() {
+		var p = pos[0];
+		var l = pos[1];
+		return {
+			index: p,
+			length: l,
+			chr: str.substr(p, l)
+		};
+	}
+}
+
+codePointIterator.isSurrogateHigh = isSurrogateHigh;
+codePointIterator.isSurrogateLow = isSurrogateLow;
+
 function verifyList(list) {
 	var map = {}, c;
 	for ( var i = 0, ii = list.length; i < ii; i++ ) {
@@ -52,30 +125,39 @@ defaults.all = (function(c) {
 })(defaults.chars);
 
 function getScheme(offset, list) {
-	var emap = {}
-		, dmap = {}
-		, i = 0
-		, olen, av, al, j, b, c, o;
+	var emap = {};
+	var dmap = {};
+	var i = 0;
+	var al = 0;
+	var olen, j, b, c, o;
 
 	offset || (offset = defaults.offset);
 	list || (list = defaults.list);
 	if ( !(offset instanceof Array) ) offset = [offset];
 	olen = offset.length;
-	av = list;
-	al = av.length;
+	var iter = codePointIterator(list, 0);
+	var avSort = [];
+	var avRand = [];
 
-	while ( al ) {
+	for (;;) {
+		c = iter.current();
 		o = offset[i%olen] || 0;
-		j = (i + o) % al;
-		j < 1 && al > 1 && (j = (1 + al) * 0.5 |0);
-		c = av.substr(j, 1);
-		av = av.substr(0, j)+av.substr(j+1);
-		b = list[i];
-		//console.log(i, j, list[i], c);
+		j = (i + o) % (al + 1);
+		avSort.push(c.chr);
+		avRand.splice(j, 0, c.chr);
+		al++;
+		i++;
+		if (iter.isLast()) {
+			break;
+		} else {
+			iter.move(1);
+		}
+	}
+	for ( i = 0; i < al; i++ ) {
+		c = avSort[i];
+		b = avRand[i];
 		emap[b] = c;
 		dmap[c] = b;
-		al = av.length;
-		i++;
 	}
 
 	return (
@@ -246,79 +328,6 @@ var obj =
 		, seed: charSeed
 		, getOffset: getOffset$1
 		};
-
-function isSurrogateHigh(n) {
-	return 0xd800 <= n && n <= 0xdbff;
-}
-function isSurrogateLow(n) {
-	return 0xdc00 <= n && n <= 0xdfff;
-}
-
-function codePointIterator(str, i) {
-	var slen = str.length;
-	var pos;
-	setPos(i);
-	return {
-		current: current,
-		move: move,
-		isFirst: isFirst,
-		isLast: isLast,
-		setPos: setPos,
-		hasPos: hasPos
-	};
-	function setPos(i) {
-		i = +i ? (i > 0 ? i : slen - i) : 0;
-		tryPos(i);
-		pos = correctPos(i);
-	}
-	function hasPos(pos) {
-		return 0 <= pos && pos < slen;
-	}
-	function isFirst() {
-		return pos[0] == 0;
-	}
-	function isLast() {
-		return (pos[0] + pos[1]) == slen;
-	}
-	function tryPos(pos) {
-		if (!hasPos(pos)) {
-			throw new Error('Out of bounds: pos '+pos+' of string with length '+slen);
-		}
-	}
-	function correctPos(p) {
-		var clen = 1;
-		if (isSurrogateLow(str.charCodeAt(p))) {
-			clen = 2;
-			p--;
-		}
-		if (isSurrogateHigh(str.charCodeAt(p))) {
-			clen = 2;
-		}
-		return [p, clen];
-	}
-	function move(walk) {
-		var step = (walk == 0) ? 0 : (walk > 0 ? 1 : -1);
-		while (walk) {
-			var p = pos[0];
-			walk -= step;
-			p += (step == 1 && pos[1] == 2) ? 2 : step;
-			tryPos(p);
-			pos = correctPos(p);
-		}
-	}
-	function current() {
-		var p = pos[0];
-		var l = pos[1];
-		return {
-			index: p,
-			length: l,
-			chr: str.substr(p, l)
-		};
-	}
-}
-
-codePointIterator.isSurrogateHigh = isSurrogateHigh;
-codePointIterator.isSurrogateLow = isSurrogateLow;
 
 var obj$1 = {
 	getExchanges: getExchanges,
