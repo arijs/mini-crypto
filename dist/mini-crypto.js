@@ -534,11 +534,13 @@ function getCripto(params) {
 		if (saltLen) {
 			str = salt(sources.salt.salt, sum, str, saltLen);
 		}
+		str = obj$1.shuffle(str, sources.seedOffset);
 		return str;
 	}
 	function decodeSources(sources, str) {
 		var sum = sources.sum;
 		var saltLen = params.salt || 0;
+		str = obj$1.deshuffle(str, sources.seedOffset);
 		if (saltLen) {
 			str = salt(sources.salt.desalt, sum, str, saltLen);
 		}
