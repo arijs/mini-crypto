@@ -1,4 +1,5 @@
 var cripto = require('../dist/mini-crypto');
+var shuffle = cripto.shuffle;
 
 function show(cripto, title) {
 
@@ -13,13 +14,15 @@ var str = 'secret ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 	, encoded2 = cripto.encode(seed2, str)
 	, sources2 = cripto.sources(seed2)
 	, decoded11 = cripto.decode(seed1, encoded1)
-	, decoded12 = cripto.decode(seed1, encoded2)
-	, decoded21 = cripto.decode(seed2, encoded1)
+	// , decoded12 = cripto.decode(seed1, encoded2)
+	// , decoded21 = cripto.decode(seed2, encoded1)
 	, decoded22 = cripto.decode(seed2, encoded2)
-	, encoded12 = cripto.encode(seed1, decoded12)
-	, recoded12 = cripto.decode(seed2, encoded12)
-	, encoded21 = cripto.encode(seed2, decoded21)
-	, recoded21 = cripto.decode(seed1, encoded21);
+	// , encoded12 = cripto.encode(seed1, decoded12)
+	// , recoded12 = cripto.decode(seed2, encoded12)
+	// , encoded21 = cripto.encode(seed2, decoded21)
+	// , recoded21 = cripto.decode(seed1, encoded21);
+	, shuffled = shuffle.shuffle(str, sources1.seedOffset)
+	, deshuffl = shuffle.deshuffle(shuffled, sources1.seedOffset);
 
 console.log('Encoded 1 ('+encoded1+'): '+seed1);
 /* @debug console.log('Sum '+sources1.sum+' '+
@@ -39,13 +42,16 @@ console.log('Encoded 2 ('+encoded2+'): '+seed2);
 );*/
 
 console.log('Decoded 1-1: '+decoded11);
-console.log('Decoded 1-2: '+decoded12);
-console.log('Decoded 2-1: '+decoded21);
+// console.log('Decoded 1-2: '+decoded12);
+// console.log('Decoded 2-1: '+decoded21);
 console.log('Decoded 2-2: '+decoded22);
-console.log('Encoded 1-2: '+encoded12);
-console.log('Recoded 1-2: '+recoded12);
-console.log('Encoded 2-1: '+encoded21);
-console.log('Recoded 2-1: '+recoded12);
+console.log('Shuffled: '+shuffled);
+console.log('Deshuffl: '+deshuffl);
+// console.log('Encoded 1-2: '+encoded12);
+// console.log('Recoded 1-2: '+recoded12);
+// console.log('Encoded 2-1: '+encoded21);
+// console.log('Recoded 2-1: '+recoded12);
+
 
 }
 

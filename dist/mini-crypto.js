@@ -249,6 +249,144 @@ var obj =
 		, getOffset: getOffset$1
 		};
 
+function isSurrogateHigh(n) {
+	return 0xd800 <= n && n <= 0xdbff;
+}
+function isSurrogateLow(n) {
+	return 0xdc00 <= n && n <= 0xdfff;
+}
+
+function codePointIterator(str, i) {
+	var slen = str.length;
+	var pos;
+	setPos(i);
+	return {
+		current: current,
+		move: move,
+		isFirst: isFirst,
+		isLast: isLast,
+		setPos: setPos,
+		hasPos: hasPos
+	};
+	function setPos(i) {
+		i = +i ? (i > 0 ? i : slen - i) : 0;
+		tryPos(i);
+		pos = correctPos(i);
+	}
+	function hasPos(pos) {
+		return 0 <= pos && pos < slen;
+	}
+	function isFirst() {
+		return pos[0] == 0;
+	}
+	function isLast() {
+		return (pos[0] + pos[1]) == slen;
+	}
+	function tryPos(pos) {
+		if (!hasPos(pos)) {
+			throw new Error('Out of bounds: pos '+pos+' of string with length '+slen);
+		}
+	}
+	function correctPos(p) {
+		var clen = 1;
+		if (isSurrogateLow(str.charCodeAt(p))) {
+			clen = 2;
+			p--;
+		}
+		if (isSurrogateHigh(str.charCodeAt(p))) {
+			clen = 2;
+		}
+		return [p, clen];
+	}
+	function move(walk) {
+		var step = (walk == 0) ? 0 : (walk > 0 ? 1 : -1);
+		while (walk) {
+			var p = pos[0];
+			walk -= step;
+			p += (step == 1 && pos[1] == 2) ? 2 : step;
+			tryPos(p);
+			pos = correctPos(p);
+		}
+	}
+	function current() {
+		var p = pos[0];
+		var l = pos[1];
+		return {
+			index: p,
+			length: l,
+			chr: str.substr(p, l)
+		};
+	}
+}
+
+codePointIterator.isSurrogateHigh = isSurrogateHigh;
+codePointIterator.isSurrogateLow = isSurrogateLow;
+
+var obj$1 = {
+	getExchanges: getExchanges,
+	shuffleExChars: shuffleExChars,
+	deshuffleExChars: deshuffleExChars,
+	shuffle: shuffle,
+	deshuffle: deshuffle
+};
+
+function getExchanges(iter, offset) {
+	var count = 0;
+	var result = [];
+	var chars = [];
+	var olen = offset.length;
+	iter.setPos(0);
+	for (;;) {
+		var c = iter.current();
+		var on = offset[count % olen];
+		count++;
+		result.push(on);
+		chars.push(c.chr);
+		if (iter.isLast()) {
+			break;
+		} else {
+			iter.move(1);
+		}
+	}
+	return {
+		count: count,
+		result: result,
+		chars: chars
+	};
+}
+
+function shuffle(str, offset) {
+	if (!str.length) return str;
+	var ex = getExchanges(codePointIterator(str, 0), offset);
+	return shuffleExChars(ex.count, ex.result, ex.chars);
+}
+
+function shuffleExChars(count, result, chars) {
+	for ( var i = 0; i < count; i++ ) {
+		var ri = result[i] % count;
+		var tmp = chars[i];
+		chars[i] = chars[ri];
+		chars[ri] = tmp;
+	}
+	return chars.join('');
+}
+
+function deshuffle(str, offset) {
+	if (!str.length) return str;
+	var ex = getExchanges(codePointIterator(str, 0), offset);
+	return deshuffleExChars(ex.count, ex.result, ex.chars);
+}
+
+function deshuffleExChars(count, result, chars) {
+	for ( var i = count-1; i >= 0; i-- ) {
+		var ri = result[i] % count;
+		var tmp = chars[i];
+		chars[i] = chars[ri];
+		chars[ri] = tmp;
+	}
+	return chars.join('');
+}
+
 function initParams(params) {
 	var mod = params.mod;
 	if ( !mod ) {
@@ -413,5 +551,7 @@ function getCripto(params) {
 var cripto = getCripto();
 cripto.custom = getCripto;
 cripto.raw = cripto$1;
+cripto.codePointIterator = codePointIterator;
+cripto.shuffle = obj$1;
 
 module.exports = cripto;
