@@ -9,13 +9,22 @@ function codePointIterator(str, i) {
 	var slen = str.length;
 	var pos;
 	setPos(i);
+	// _break and ctx for use in forEach()
+	var _break = {};
+	var ctx = {
+		_break: _break
+	};
 	return {
-		current: current,
-		move: move,
+		setPos: setPos,
+		hasPos: hasPos,
 		isFirst: isFirst,
 		isLast: isLast,
-		setPos: setPos,
-		hasPos: hasPos
+		codePoint: codePoint,
+		current: current,
+		move: move,
+		forEach: forEach,
+		toArray: toArray,
+		toCodePointArray: toCodePointArray
 	};
 	function setPos(i) {
 		i = +i ? (i > 0 ? i : slen - i) : 0;
@@ -47,6 +56,14 @@ function codePointIterator(str, i) {
 		}
 		return [p, clen];
 	}
+	function codePoint() {
+		var first = str.charCodeAt(pos[0]);
+		var second = pos[1] == 2 ? str.charCodeAt(pos[0]+1) : 0;
+		if (isSurrogateHigh(first) && isSurrogateLow(second)) {
+			return (first - 0xD800) * 0x400 + second - 0xDC00 + 0x10000;
+		}
+		return first;
+	}
 	function move(walk) {
 		var step = (walk == 0) ? 0 : (walk > 0 ? 1 : -1);
 		while (walk) {
@@ -66,18 +83,57 @@ function codePointIterator(str, i) {
 			chr: str.substr(p, l)
 		};
 	}
+	function forEach(mv, fn) {
+		if (!mv) throw new Error('Invalid CodePointIterator forEach move '+mv);
+		for(;;) {
+			var p = pos[0];
+			var l = pos[1];
+			var c = str.substr(p, l);
+			var ret = fn.call(ctx, c, p, l);
+			var isEnd = mv > 0 ? isLast() : isFirst();
+			if ( isEnd || ret === _break ) {
+				break;
+			} else {
+				move(mv);
+			}
+		}
+	}
+	function toArray() {
+		var list = [];
+		forEach(1, function(c) {
+			list.push(c);
+		});
+		return list;
+	}
+	function toCodePointArray() {
+		var list = [];
+		forEach(1, function() {
+			list.push(codePoint());
+		});
+		return list;
+	}
 }
 
 codePointIterator.isSurrogateHigh = isSurrogateHigh;
 codePointIterator.isSurrogateLow = isSurrogateLow;
 
+/* eslint no-console:1 */
+function stringToList(str) {
+	return codePointIterator(str, 0).toArray();
+}
+
 function verifyList(list) {
 	var map = {}, c;
+	var repeat;
 	for ( var i = 0, ii = list.length; i < ii; i++ ) {
-		c = list.charAt(i);
-		if ( c in map ) throw new Error('Repeated character: "'+c+'"');
-		map[c] = true;
+		if ( c in map ) {
+			repeat = c;
+			break;
+		} else {
+			map[c] = true;
+		}
 	}
+	if (repeat) throw new Error('Repeated character: "'+repeat+'"');
 	return list;
 }
 
@@ -92,113 +148,119 @@ var defaults =
 			, punct2: '!"#$%&\'?@\\^|~_`´'
 			, punct3: '¡¢£¤¥¦§¨©ª«¬­®¯°±²³µ¶·¹º»¼½¾¿×÷ '
 			}
-		, list: ''
+		, list: null
 		, offset: 32
 		, scheme: null
 		};
 
 defaults.list = (function(c) {
 	// The sum of all these chars is 144
-	return verifyList(
-		''.concat(
-			c.letterup,
-			c.letterdown,
-			c.accentup,
-			c.accentdown,
-			c.numbers,
-			c.punct1,
-			c.punct2));
+	return verifyList(stringToList(''.concat(
+		c.letterup,
+		c.letterdown,
+		c.accentup,
+		c.accentdown,
+		c.numbers,
+		c.punct1,
+		c.punct2
+	)));
 })(defaults.chars);
 
 defaults.all = (function(c) {
 	// The sum of all these chars is 176
-	return verifyList(
-		''.concat(
-			c.letterup,
-			c.letterdown,
-			c.accentup,
-			c.accentdown,
-			c.numbers,
-			c.punct1,
-			c.punct2,
-			c.punct3));
+	return verifyList(stringToList(''.concat(
+		c.letterup,
+		c.letterdown,
+		c.accentup,
+		c.accentdown,
+		c.numbers,
+		c.punct1,
+		c.punct2,
+		c.punct3
+	)));
 })(defaults.chars);
 
-function getScheme(offset, list) {
+function getSchemeOffset(list, offset) {
+	offset || (offset = defaults.offset);
+	if ( !(offset instanceof Array) ) offset = [offset];
+	var olen = offset.length;
+	var fn = function(i) {
+		return i + (offset[i%olen] || 0);
+	};
+	fn.offset = offset;
+	return getSchemeFn(list, fn);
+}
+
+function getSchemeFn(list, fn) {
 	var emap = {};
 	var dmap = {};
-	var i = 0;
 	var al = 0;
-	var olen, j, b, c, o;
+	var len, b, c;
 
-	offset || (offset = defaults.offset);
 	list || (list = defaults.list);
-	if ( !(offset instanceof Array) ) offset = [offset];
-	olen = offset.length;
-	var iter = codePointIterator(list, 0);
+	len = list.length;
 	var avSort = [];
 	var avRand = [];
 
-	for (;;) {
-		c = iter.current();
-		o = offset[i%olen] || 0;
-		j = (i + o) % (al + 1);
-		avSort.push(c.chr);
-		avRand.splice(j, 0, c.chr);
-		al++;
-		i++;
-		if (iter.isLast()) {
-			break;
-		} else {
-			iter.move(1);
-		}
+	for ( al = 0; al < len; al++ ) {
+		avSort.push(c);
+		avRand.splice(fn(al) % (al + 1), 0, c);
 	}
-	for ( i = 0; i < al; i++ ) {
-		c = avSort[i];
-		b = avRand[i];
+	for ( al = 0; al < len; al++ ) {
+		c = avSort[al];
+		b = avRand[al];
 		emap[b] = c;
 		dmap[c] = b;
 	}
 
-	return (
-		{ offset: offset
-		, list: list
-		, encode: emap
-		, decode: dmap
-		});
+	return {
+		offset: fn.offset,
+		list: list,
+		encode: emap,
+		decode: dmap
+	};
 }
 
-defaults.scheme = getScheme();
+defaults.scheme = getSchemeOffset();
 
 function convert(str, map) {
-	if ( str == null ) throw new Error('No string to convert');
-	var conv = '', c;
-	for ( var i = 0, ii = str.length; i < ii; i++ ) {
-		c = str.charAt(i);
-		c = c in map ? map[c] : c;
-		conv += c;
-	}
+	if ( !str ) return str;
+	var conv = '';
+	var iter = codePointIterator(str, 0);
+	iter.forEach(1, function(c) {
+		conv += c in map ? map[c] : c;
+	});
 	return conv;
 }
 
-function custom(offset, list) {
-	var scheme = (offset || list)
-			? getScheme(offset, list)
-			: defaults.scheme;
-	return (
-		{ scheme: scheme
-		, encode: function(str) {
-				return convert(str, scheme.encode);
-			}
-		, decode: function(str) {
-				return convert(str, scheme.decode);
-			}
-		});
+function getSchemeObject(scheme) {
+	return {
+		scheme: scheme,
+		encode: function(str) {
+			return convert(str, scheme.encode);
+		},
+		decode: function(str) {
+			return convert(str, scheme.decode);
+		}
+	};
 }
 
-var cripto$1 = custom();
+function customOffset(list, offset) {
+	var scheme = (list || offset)
+		? getSchemeOffset(list, offset)
+		: defaults.scheme;
+	return getSchemeObject(scheme);
+}
+
+function customFn(list, fn) {
+	var scheme = getSchemeFn(list, fn);
+	return getSchemeObject(scheme);
+}
+
+var cripto$1 = customOffset();
 cripto$1.defaults = defaults;
-cripto$1.custom = custom;
+cripto$1.customOffset = customOffset;
+cripto$1.customFn = customFn;
 
 function getSum(str, params, calcFn) {
 	var slen = str && str.length || 0;
@@ -223,43 +285,38 @@ function calcSumDefault(stringLength, charIndex, charCode, currentSum, modulo) {
 	return currentSum;
 }
 
+/* eslint no-console:1 */
+
 function randstr(len, charlist) {
-	var clen = charlist.length
-		, rand = '';
+	var clen = charlist.length;
+	var rand = '';
 	for ( var i = 0; i < len; i++ ) {
-		rand += clen && charlist.charAt((Math.random()*clen)%clen) || ' ';
+		var ci = (Math.random()*clen)%clen|0;
+		rand += (clen && charlist[ci]) || ' ';
 	}
 	return rand;
 }
 
 function getSalt(charlist) {
-	return (
-		{ salt: function(str, pre, post) {
-				pre = randstr(pre, charlist);
-				post = randstr(post, charlist);
-				return pre+str+post;
-			}
-		, desalt: function(str, pre, post) {
-				return str.substr(pre, str.length-pre-post);
-			}
-		});
+	return {
+		salt: function(str, pre, post) {
+			pre = randstr(pre, charlist);
+			post = randstr(post, charlist);
+			return pre+str+post;
+		},
+		desalt: function(str, pre, post) {
+			str = codePointIterator(str, 0).toArray();
+			str = str.slice(pre, str.length - post);
+			str = str.join('');
+			return str;
+		}
+	};
 }
 
 getSalt.randstr = randstr;
 
-function charOffset(offset, list) {
-	offset = [].concat(offset || []);
-	offset[0] || (offset[0] = 1);
-	var index = getIndex(list)
-		, invert = invOffset(offset);
-	return (
-		{ encode: function(str) {
-				return convert$1(str, list, index, offset);
-			}
-		, decode: function(str) {
-				return convert$1(str, list, index, invert);
-			}
-		});
+function stringToList$1(str) {
+	return codePointIterator(str, 0).toArray();
 }
 
 function invOffset(offset) {
@@ -271,24 +328,21 @@ function invOffset(offset) {
 }
 
 function getIndex(list) {
-	var index = {}
-		, i = 0
-		, count = list.length;
-	for ( i = 0; i < count; i++ ) {
+	var index = {};
+	for ( var i = 0, ii = list.length; i < ii; i++ ) {
 		index[list[i]] = i;
 	}
 	return index;
 }
 
 function convert$1(str, list, index, offset) {
-	var len = list.length
-		, olen = offset.length
-		, slen = str.length
-		, after = ''
-		, pos = 0;
-	for ( var i = 0; i < slen; i++ ) {
-		var o = offset[i%olen]
-			, c = str[i];
+	var len = list.length;
+	var olen = offset.length;
+	var after = '';
+	var pos = 0, i = 0;
+	var iter = codePointIterator(str, 0);
+	iter.forEach(1, function(c) {
+		var o = offset[i%olen];
 		o = ((o % len) + len) % len;
 		pos += o;
 		pos %= len;
@@ -296,26 +350,51 @@ function convert$1(str, list, index, offset) {
 			c = list[ (index[c] + pos) % len ];
 		}
 		after += c;
-	}
+		i++;
+	});
 	return after;
 }
 
+function charOffset(offset, list) {
+	offset = [].concat(offset || []);
+	offset[0] || (offset[0] = 1);
+	var index = getIndex(list);
+	var invert = invOffset(offset);
+	return {
+		encode: function(str) {
+			return convert$1(str, list, index, offset);
+		},
+		decode: function(str) {
+			return convert$1(str, list, index, invert);
+		}
+	};
+}
+
+function charOffsetString(offset, list) {
+	return charOffset(offset, stringToList$1(list));
+}
+
 function getOffset$1(seed, sum, offset, list) {
-	var olen = offset.length
-		, slen = seed.length
-		, chOffset = []
-		, total = 0
-		, current
-		, n;
-	list = list.length;
+	var chOffset = [];
+	var total = 0;
+	var current;
+	var n;
+	seed = codePointIterator(seed, 0).toCodePointArray();
+	var slen = seed.length;
+	var olen = offset.length;
+	var len = list.length;
 	for ( var i = 0; i < olen; i++ ) {
-		n = seed.charCodeAt(i % slen);
+		n = seed[i % slen];
 		current = (n + i) * sum + n + i;
 		total += current + (offset[current%olen] || 0);
-		total %= list;
+		total %= len;
 		chOffset[i] = total;
 	}
 	return chOffset;
+}
+
+function getOffsetString(seed, sum, offset, list) {
+	return getOffset$1(seed, sum, offset, stringToList$1(list));
 }
 
 function charSeed(seed, sum, offset, list) {
@@ -323,11 +402,19 @@ function charSeed(seed, sum, offset, list) {
 	return charOffset(chOffset, list);
 }
 
-var obj =
-		{ offset: charOffset
-		, seed: charSeed
-		, getOffset: getOffset$1
-		};
+function charSeedString(seed, sum, offset, list) {
+	return charSeed(seed, sum, offset, stringToList$1(list));
+}
+
+var obj = {
+	stringToList: stringToList$1,
+	charOffset: charOffset,
+	charOffsetString: charOffsetString,
+	getOffset: getOffset$1,
+	getOffsetString: getOffsetString,
+	charSeed: charSeed,
+	charSeedString: charSeedString
+};
 
 var obj$1 = {
 	getExchanges: getExchanges,
@@ -394,6 +481,7 @@ function deshuffleExChars(count, result, chars) {
 	return chars.join('');
 }
 
+/* eslint no-console:1 */
 function initParams(params) {
 	var mod = params.mod;
 	if ( !mod ) {
@@ -408,6 +496,9 @@ function initParams(params) {
 	var list = params.list;
 	if ( !list ) {
 		list = cripto$1.scheme.list;
+	}
+	if ('string' === typeof list) {
+		list = obj.stringToList(list);
 	}
 	var len = list.length;
 	if ( len < 16 && !params.unsafe ) {
@@ -505,8 +596,8 @@ function getSources(seed, params) {
 		seedOffset: seedOffset,
 		chOffset: chOffset,
 		verify: verifyOffset(offset, chOffset),
-		charOffset: obj.offset(chOffset, list),
-		cripto: cripto$1.custom(chOffset, list),
+		charOffset: obj.charOffset(chOffset, list),
+		cripto: cripto$1.customOffset(list, chOffset),
 		salt: salt
 	});
 }
@@ -530,6 +621,7 @@ function getCripto(params) {
 		, encodeSources: encodeSources
 		, decodeSources: decodeSources
 		, randstr: function(len) {
+				// console.log('randstr '+len, params.list);
 				return getSalt.randstr(len, params.list);
 			}
 		});
@@ -560,6 +652,7 @@ function getCripto(params) {
 var cripto = getCripto();
 cripto.custom = getCripto;
 cripto.raw = cripto$1;
+cripto.charOffset = obj;
 cripto.codePointIterator = codePointIterator;
 cripto.shuffle = obj$1;
 
